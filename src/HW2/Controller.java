@@ -14,7 +14,8 @@ public class Controller {
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
-
+        config.setMaxDepthOfCrawling(16);
+        config.setMaxPagesToFetch(10);       
         /*
          * Instantiate the controller for this crawl.
          */
@@ -28,9 +29,7 @@ public class Controller {
          * URLs that are fetched and then the crawler starts following links
          * which are found in these pages
          */
-        controller.addSeed("http://www.ics.uci.edu/~lopes/");
-        controller.addSeed("http://www.ics.uci.edu/~welling/");
-    	controller.addSeed("http://www.ics.uci.edu/");
+        controller.addSeed("https://www.nbcnews.com/");
 
         /*
          * Start the crawl. This is a blocking operation, meaning that your code
