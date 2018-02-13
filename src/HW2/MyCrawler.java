@@ -21,31 +21,20 @@ import edu.uci.ics.crawler4j.url.WebURL;
 
 public class MyCrawler extends WebCrawler {
 
-	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
-	                                                       + "|png|mp3|mp4|zip|gz))$");
+	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js"
+	                                                       + "|mp3|mp4|zip|gz))$");
 	List<String[]> status = new LinkedList<>();
 	List<String[]> pages = new LinkedList<>();
 	List<String[]> oks = new LinkedList<>();
 	
-	HashSet<String> extractok = new HashSet<>();
-	HashSet<String> extractnotok = new HashSet<>();
-	
-	int numberOfAttampts = 0;
-	int numberOfSucceed = 0;
-	int numberOfNotSucceed = 0;
-	
-	int numberOfTotalExtract = 0;
-	int numberOfUniqueExtract = 0;
-	int numberOfUniqueIn = 0;
-	int numberOfUniqueOut = 0;
 	 @Override
 	public boolean shouldVisit(Page referringPage, WebURL url) {
 		String[] line = new String[2];
 		String href = url.getURL().toLowerCase();
 		line[0] = url.getURL();
-		line[1] = href.startsWith("https://www.nbcnews.com/") ? "OK" : "N_OK";
+		line[1] = (href.startsWith("https://www.nbcnews.com/") || href.startsWith("http://www.nbcnews.com/"))? "OK" : "N_OK";
 		oks.add(line);
-		return !FILTERS.matcher(href).matches() && href.startsWith("https://www.nbcnews.com/");
+		return !FILTERS.matcher(href).matches() && (href.startsWith("https://www.nbcnews.com/") || href.startsWith("http://www.nbcnews.com/"));
 	}
     protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
         // Do nothing by default
@@ -54,12 +43,37 @@ public class MyCrawler extends WebCrawler {
     	line[0] = webUrl.getURL();
     	line[1] = statusCode + "";
     	status.add(line);
-    	numberOfAttampts++;
-    	if(statusCode == 200)
-    		numberOfSucceed++;
-    	else
-    		numberOfNotSucceed++;
     }
+	 /**
+	  * This function is called when a page is fetched and ready
+	  * to be processed by your program.
+	  */
+	 @Override
+	 public void visit(Page page) {
+		 String[] line = new String[4];
+	     String url = page.getWebURL().getURL();
+	     System.out.println("URL: " + url);
+	     line[0] = url;
+	     line[1] = page.getContentData().length + "";
+	     // before we open the file check to see if it already exists
+	 
+	     if (page.getParseData() instanceof HtmlParseData) {
+	         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
+	         String text = htmlParseData.getText();
+	         String html = htmlParseData.getHtml();
+	         Set<WebURL> links = htmlParseData.getOutgoingUrls();
+	         line[2] = links.size() + "";
+	         line[3] = page.getContentType().split(";")[0];
+
+	         System.out.println("Text length: " + text.length());
+	         System.out.println("Html length: " + html.length());
+	         System.out.println("Number of outgoing links: " + links.size());
+	     
+	     }
+	     
+	     pages.add(line);
+	     
+	}
     public void onBeforeExit() {
         // Do nothing by default
         // Sub-classed can override this to add their custom functionality
@@ -152,54 +166,8 @@ public class MyCrawler extends WebCrawler {
         } catch (IOException e) {
             e.printStackTrace();
         }   
-        
-    	
-
-    	
-    	System.out.println("numberOfAttampts:" + this.numberOfAttampts);
-    	System.out.println("numberOfSucceed" + this.numberOfSucceed);
-    	System.out.println("numberOfNotSucceed" + this.numberOfNotSucceed);
-    	System.out.println("numberOfTotalExtract" + this.numberOfTotalExtract);
-    	System.out.println("numberOfUniqueExtract" + (this.extractok.size() + this.extractnotok.size()));
-    	System.out.println("numberOfUniqueIn" + this.extractok.size());
-    	System.out.println("numberOfUniqueOut" + this.extractnotok.size());    	
+        	
     }
 
-	 /**
-	  * This function is called when a page is fetched and ready
-	  * to be processed by your program.
-	  */
-	 @Override
-	 public void visit(Page page) {
-		 String[] line = new String[4];
-	     String url = page.getWebURL().getURL();
-	     System.out.println("URL: " + url);
-	     line[0] = url;
-	     line[1] = page.getContentData().length + "";
-	     // before we open the file check to see if it already exists
-	 
-	     if (page.getParseData() instanceof HtmlParseData) {
-	         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
-	         String text = htmlParseData.getText();
-	         String html = htmlParseData.getHtml();
-	         Set<WebURL> links = htmlParseData.getOutgoingUrls();
-	         line[2] = links.size() + "";
-	         line[3] = page.getContentType();
-	         this.numberOfTotalExtract += links.size();
-	         for(WebURL item : links) {
-	        	 String cur = item.getURL();
-	        	 if(cur.startsWith("https://www.nbcnews.com/"))
-	        		 this.extractok.add(cur);
-	        	 else
-	        		 this.extractnotok.add(cur);
-	         }
-	         System.out.println("Text length: " + text.length());
-	         System.out.println("Html length: " + html.length());
-	         System.out.println("Number of outgoing links: " + links.size());
-	     
-	     }
-	     
-	     pages.add(line);
-	     
-	}
+
 }
