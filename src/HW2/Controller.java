@@ -10,12 +10,12 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 public class Controller {
     public static void main(String[] args) throws Exception {
         String crawlStorageFolder = "C:\\Users\\Daniel\\Desktopt\\572HW2\\test";
-        int numberOfCrawlers = 7;
+        int numberOfCrawlers = 16;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
         config.setMaxDepthOfCrawling(16);
-        config.setMaxPagesToFetch(10);       
+        config.setMaxPagesToFetch(1000);       
         /*
          * Instantiate the controller for this crawl.
          */
